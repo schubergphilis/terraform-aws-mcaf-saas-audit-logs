@@ -1,0 +1,2 @@
+compress_json==1.0.6
+requests==2.26.0

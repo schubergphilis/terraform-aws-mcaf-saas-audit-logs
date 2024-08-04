@@ -1,0 +1,4 @@
+skip-check:
+  # This will always fail because we use the Terraform Cloud Registry whenever possible so
+  # we'll always skip it
+  - CKV_TF_1
