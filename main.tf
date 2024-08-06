@@ -5,7 +5,7 @@
 // When adding a new source, add a new block to `local.source_defaults`  with it's default values.
 //
 // If a source requires additional resources not coverd by the generic `audit-lambda` module,
-// put these resources in a separate file named after the source, e.g. `terraform_cloud.tf`.
+// put these resources in a separate file named after the source, e.g. `terraform-cloud.tf`.
 //
 locals {
   source_defaults = {

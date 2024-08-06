@@ -8,8 +8,7 @@ This module will create the necessary resources to fetch audit logs from SaaS pr
 - Okta
 - Terraform Cloud
 
-> **Note**
->
+> [!NOTE]
 > This module was created as a way to store audit logs in a central location for compliance purposes. At this time the lambdas collect logs for the previous day and can only be scheduled once per day. In a future version we will add log deduplication and the ability to fetch logs more frequently.
 
 ## Usage
@@ -18,7 +17,7 @@ The module requires at least `var.kms_key_arn` and one source configured in `var
 
 ```hcl
 module "saas_audit_logs" {
-  source = "/Users/shoekstra/git/schubergphilis/terraform-aws-mcaf-saas-audit-logs/"
+  source = "schubergphilis/mcaf-saas-audit-logs/aws"
 
   kms_key_arn = module.kms_key.arn
 

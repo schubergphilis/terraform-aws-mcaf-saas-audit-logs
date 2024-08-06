@@ -81,7 +81,7 @@ variable "sources" {
 
   validation {
     condition     = alltrue([for source in keys(var.sources) : contains(["gitlab", "okta", "terraform-cloud"], source)])
-    error_message = "Invalid source, can be gitlab, okta or terraform-cloud."
+    error_message = "Invalid key, supported sources: \"${join("\", \"", ["gitlab", "okta", "terraform-cloud"])}\"."
   }
 
   validation {
