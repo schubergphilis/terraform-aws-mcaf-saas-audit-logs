@@ -23,11 +23,6 @@ locals {
   bucket_for_audit_logs     = var.create_bucket ? module.bucket_for_audit_logs[0] : data.aws_s3_bucket.bucket["audit_logs"]
   bucket_for_lambda_package = var.create_bucket ? module.bucket_for_lambda_package[0] : data.aws_s3_bucket.bucket["lambda_package"]
 
-  s3_object_key = element(
-    split("/", module.lambda_package.local_filename),
-    length(split("/", module.lambda_package.local_filename)) - 1
-  )
-
   scheduled_time       = split(":", var.scheduled_time)
   scheduled_expression = "cron(${tonumber(local.scheduled_time[1])} ${tonumber(local.scheduled_time[0])} ? * * *)"
 }
@@ -55,12 +50,8 @@ data "aws_iam_policy_document" "iam_policy" {
     actions = [
       "kms:Decrypt",
       "kms:Encrypt",
-      "kms:GenerateDataKey",
-      "kms:ReEncryptTo",
-      "kms:GenerateDataKeyWithoutPlaintext",
-      "kms:GenerateDataKeyPairWithoutPlaintext",
-      "kms:GenerateDataKeyPair",
-      "kms:ReEncryptFrom"
+      "kms:GenerateDataKey*",
+      "kms:ReEncrypt*",
     ]
   }
 
@@ -133,7 +124,7 @@ module "bucket_for_audit_logs" {
   source  = "schubergphilis/mcaf-s3/aws"
   version = "~> 0.14.1"
 
-  name              = "${var.bucket_base_name}-${data.aws_caller_identity.current.account_id}"
+  name_prefix       = var.bucket_base_name
   kms_key_arn       = var.kms_key_arn
   lifecycle_rule    = [local.bucket_lifecycle_rules["one-year-tiered"]]
   object_lock_mode  = var.object_locking.mode
@@ -153,7 +144,7 @@ module "bucket_for_access_logs" {
   source  = "schubergphilis/mcaf-s3/aws"
   version = "~> 0.14.1"
 
-  name              = "${var.bucket_base_name}-access-logs-${data.aws_caller_identity.current.account_id}"
+  name_prefix       = "${var.bucket_base_name}-access-logs"
   kms_key_arn       = var.kms_key_arn
   lifecycle_rule    = [local.bucket_lifecycle_rules["one-year-tiered"]]
   object_lock_mode  = var.object_locking.mode
@@ -168,7 +159,7 @@ module "bucket_for_lambda_package" {
   source  = "schubergphilis/mcaf-s3/aws"
   version = "~> 0.14.1"
 
-  name           = "${var.bucket_base_name}-lambda-${data.aws_caller_identity.current.account_id}"
+  name_prefix    = "${var.bucket_base_name}-lambda"
   kms_key_arn    = var.kms_key_arn
   lifecycle_rule = [local.bucket_lifecycle_rules["basic"]]
   versioning     = true
@@ -195,15 +186,13 @@ module "lambda_package" {
   runtime                  = "python${var.python_version}"
   source_path              = var.lambda_source_path
   artifacts_dir            = "${path.root}/package"
-  tags                     = var.tags
-}
 
-resource "aws_s3_object" "lambda_package" {
-  bucket     = local.bucket_for_lambda_package.id
-  key        = "${join("-", [var.lambda_name, substr(local.s3_object_key, 0, 7)])}.zip"
-  kms_key_id = var.kms_key_arn
-  source     = module.lambda_package.local_filename
-  tags       = var.tags
+  store_on_s3             = true
+  s3_bucket               = local.bucket_for_lambda_package.id
+  s3_object_storage_class = "STANDARD"
+  s3_prefix               = var.lambda_name
+
+  tags = var.tags
 }
 
 module "lambda" {
@@ -221,9 +210,9 @@ module "lambda" {
   policy                 = data.aws_iam_policy_document.iam_policy.json
   runtime                = "python${var.python_version}"
   s3_bucket              = "${var.bucket_base_name}-lambda-${data.aws_caller_identity.current.account_id}"
-  s3_key                 = aws_s3_object.lambda_package.key
-  s3_object_version      = aws_s3_object.lambda_package.version_id
-  source_code_hash       = aws_s3_object.lambda_package.checksum_sha256
+  s3_key                 = module.lambda_package.s3_object.key
+  s3_object_version      = module.lambda_package.s3_object.version_id
+  source_code_hash       = module.lambda_package.lambda_function_source_code_hash
   timeout                = 600
   tags                   = var.tags
 
