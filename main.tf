@@ -12,18 +12,17 @@ locals {
     basic = {
       id                                = "basic"
       enabled                           = true
-      abort_incomplete_multipart_upload = { days_after_initiation = 7 }
-      expiration                        = { expired_object_delete_marker = true }
+      abort_incomplete_multipart_upload = { days_after_initiation = 3 }
+      expiration                        = { days = 730 }
       noncurrent_version_expiration     = { noncurrent_days = 7 }
     }
     one-year-tiered = {
       id                                = "one-year-tiered"
       enabled                           = true
-      abort_incomplete_multipart_upload = { days_after_initiation = 14 }
+      abort_incomplete_multipart_upload = { days_after_initiation = 3 }
       expiration                        = { days = 365 }
-      noncurrent_version_expiration     = { noncurrent_days = 365 }
-      noncurrent_version_transition     = { noncurrent_days = 90, storage_class = "INTELLIGENT_TIERING" }
-      transition                        = { days = 90, storage_class = "INTELLIGENT_TIERING" }
+      noncurrent_version_expiration     = { noncurrent_days = 30 }
+      transition                        = { days = 90, storage_class = "GLACIER_IR" }
     }
   }
 
