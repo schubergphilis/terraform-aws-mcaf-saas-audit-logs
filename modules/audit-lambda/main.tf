@@ -143,13 +143,12 @@ module "bucket_for_access_logs" {
   source  = "schubergphilis/mcaf-s3/aws"
   version = "~> 0.14.1"
 
-  name_prefix       = "${var.bucket_base_name}-access-logs"
-  kms_key_arn       = var.kms_key_arn
-  lifecycle_rule    = [local.bucket_lifecycle_rules["one-year-tiered"]]
-  object_lock_mode  = var.object_locking.mode
-  object_lock_years = var.object_locking.years
-  versioning        = true
-  tags              = var.tags
+  name_prefix                = "${var.bucket_base_name}-access-logs"
+  kms_key_arn                = var.kms_key_arn
+  lifecycle_rule             = [local.bucket_lifecycle_rules["one-year-tiered"]]
+  logging_source_bucket_arns = [module.bucket_for_audit_logs[0].arn]
+  versioning                 = true
+  tags                       = var.tags
 }
 
 module "bucket_for_lambda_package" {
