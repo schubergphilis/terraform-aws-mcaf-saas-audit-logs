@@ -166,6 +166,7 @@ module "bucket_for_lambda_package" {
 }
 
 resource "aws_secretsmanager_secret" "token" {
+  #checkov:skip=CKV2_AWS_57: The api key stored as a secrets is passed down by the end user of this module, therefore secret rotation is not possible.
   name       = var.secret_name
   kms_key_id = var.kms_key_arn
   tags       = var.tags

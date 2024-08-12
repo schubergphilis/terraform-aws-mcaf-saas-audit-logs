@@ -11,7 +11,7 @@ run "basic" {
 
   variables {
     kms_key_arn = "arn:aws:kms:eu-central-1:${run.setup.account_id}:key/${run.setup.random_uuid}"
-    sources = {}
+    sources     = {}
   }
 
   expect_failures = [
