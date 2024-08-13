@@ -176,22 +176,12 @@ resource "aws_secretsmanager_secret_version" "token" {
   secret_string = var.api_token
 }
 
-module "lambda_package" {
-  source  = "terraform-aws-modules/lambda/aws"
-  version = "~> 7.2.5"
-
-  create_function          = false
-  recreate_missing_package = false
-  runtime                  = "python${var.python_version}"
-  source_path              = var.lambda_source_path
-  artifacts_dir            = "${path.root}/package"
-
-  store_on_s3             = true
-  s3_bucket               = local.bucket_for_lambda_package.id
-  s3_object_storage_class = "STANDARD"
-  s3_prefix               = var.lambda_name
-
-  tags = var.tags
+resource "aws_s3_object" "lambda_package" {
+  bucket     = local.bucket_for_lambda_package.id
+  key        = "${var.lambda_name}-lambda.zip"
+  kms_key_id = var.kms_key_arn
+  source     = var.lambda_pkg_path
+  tags       = var.tags
 }
 
 module "lambda" {
@@ -209,9 +199,9 @@ module "lambda" {
   policy                 = data.aws_iam_policy_document.iam_policy.json
   runtime                = "python${var.python_version}"
   s3_bucket              = "${var.bucket_base_name}-lambda-${data.aws_caller_identity.current.account_id}"
-  s3_key                 = module.lambda_package.s3_object.key
-  s3_object_version      = module.lambda_package.s3_object.version_id
-  source_code_hash       = module.lambda_package.lambda_function_source_code_hash
+  s3_key                 = aws_s3_object.lambda_package.key
+  s3_object_version      = aws_s3_object.lambda_package.version_id
+  source_code_hash       = aws_s3_object.lambda_package.checksum_sha256
   timeout                = 600
   tags                   = var.tags
 

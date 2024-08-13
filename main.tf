@@ -130,8 +130,8 @@ module "lambda" {
   lambda_log_retention = var.lambda_log_retention
   lambda_memory_size   = try(each.value.lambda_memory_size, null)
   lambda_name          = try(each.value.lambda_name, "${each.key}-audit-log-fetcher")
+  lambda_pkg_path      = "${path.module}/lambdas/${each.key}/pkg/lambda.zip"
   lambda_policy        = try(each.value.lambda_policy, null)
-  lambda_source_path   = "${path.module}/lambdas/${each.key}"
   object_locking       = var.object_locking
   scheduled_time       = var.scheduled_time
   secret_name          = try(each.value.secret_name, "/audit-log-tokens/${each.key}")

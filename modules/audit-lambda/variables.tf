@@ -91,15 +91,15 @@ variable "lambda_name" {
   description = "The name of the Lambda function"
 }
 
+variable "lambda_pkg_path" {
+  type        = string
+  description = "Path to the built Lambda function code to deploy"
+}
+
 variable "lambda_policy" {
   type        = string
   description = "Additional policy statements to add to Lambda role"
   default     = null
-}
-
-variable "lambda_source_path" {
-  type        = string
-  description = "Path to the Lambda function source code"
 }
 
 variable "object_locking" {
