@@ -118,6 +118,10 @@ variable "python_version" {
   type        = string
   default     = "3.12"
   description = "The version of Python to use for the Lambda function"
+  validation {
+    condition = contains(["3.8", "3.9", "3.10", "3.11", "3.12"], var.python_version)
+    error_message = "The python_version must be one of: 3.8, 3.9, 3.10, 3.11, 3.12."
+  }
 }
 
 variable "scheduled_time" {

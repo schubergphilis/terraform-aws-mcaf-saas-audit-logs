@@ -1,0 +1,86 @@
+name: Build and Package Lambdas
+
+on:
+  push:
+    # branches: Maybe only limit to main instead of all pushes?
+    # - main
+
+jobs:
+  pkg:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        lambda-name: ["gitlab", "okta", "terraform-cloud"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          cd lambdas/${{ matrix.lambda-name }}/src
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create Lambda deployment package
+        run: |
+          cd lambdas/${{ matrix.lambda-name }}/src
+          mkdir -p ../pkg
+          cd venv/lib/python${{ matrix.python-version }}/site-packages
+          zip -r ../../../../../pkg/lambda_function_${{ matrix.python-version }}.zip .
+          cd ../../../../
+          zip -g ../pkg/lambda_function_${{ matrix.python-version }}.zip -r * --exclude venv/\*
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.lambda-name }}-${{ matrix.python-version }}
+          path: lambdas/${{ matrix.lambda-name }}/pkg/lambda_function_${{ matrix.python-version }}.zip
+
+  push:
+    runs-on: ubuntu-latest
+    needs: pkg
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Remove old pkg artifacts
+        run: |
+          rm -rf lambdas/*/pkg/*
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: lambdas/
+      - name: Download artifacts for each lambda
+        run: |
+          for lambda in gitlab okta terraform-cloud; do
+            mkdir -p lambdas/$lambda/pkg
+            mv lambdas/$lambda-3.8/lambda_function_3.8.zip lambdas/$lambda/pkg/lambda_function_3.8.zip
+            mv lambdas/$lambda-3.9/lambda_function_3.9.zip lambdas/$lambda/pkg/lambda_function_3.9.zip
+            mv lambdas/$lambda-3.10/lambda_function_3.10.zip lambdas/$lambda/pkg/lambda_function_3.10.zip
+            mv lambdas/$lambda-3.11/lambda_function_3.11.zip lambdas/$lambda/pkg/lambda_function_3.11.zip
+            mv lambdas/$lambda-3.12/lambda_function_3.12.zip lambdas/$lambda/pkg/lambda_function_3.12.zip
+          done
+
+      - name: Conditionally add and commit deployment packages
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+          git add lambdas/*/pkg/*.zip
+          git commit -m "Add all Lambda deployment packages from previous builds" || echo "No changes to commit"
+
+      - name: Push deployment packages
+        if: success()
+        run: |
+          git push
