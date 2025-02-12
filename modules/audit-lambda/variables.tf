@@ -116,7 +116,7 @@ variable "object_locking" {
 
 variable "python_version" {
   type        = string
-  default     = "3.12"
+  default     = "3.13"
   description = "The version of Python to use for the Lambda function"
 }
 
