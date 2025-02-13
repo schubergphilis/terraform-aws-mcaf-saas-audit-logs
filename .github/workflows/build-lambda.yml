@@ -51,15 +51,15 @@ jobs:
           cd $LAMBDA_DIR/${{ matrix.lambda-name }}/venv/lib/python${{ matrix.python-version }}/site-packages
 
           # Package the lambda function. Package the dependencies and then add the source code to the created zip to ensure a flat archive structure.
-          zip -r ../../../../../../../$PKG_DIR/lambda_${{ matrix.lambda-name }}.zip .
+          zip -r ../../../../../../../$PKG_DIR/lambda_${{ matrix.lambda-name }}_python${{ matrix.python-version }}.zip .
           cd ../../../../
-          zip -g ../../../$PKG_DIR/lambda_${{ matrix.lambda-name }}.zip -r  * --exclude venv/\*          
+          zip -g ../../../$PKG_DIR/lambda_${{ matrix.lambda-name }}_python${{ matrix.python-version }}.zip -r  * --exclude venv/\*          
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lambda_${{ matrix.lambda-name }}.zip
-          path: files/pkg/lambda_${{ matrix.lambda-name }}.zip
+          name: lambda_${{ matrix.lambda-name }}_python${{ matrix.python-version }}.zip
+          path: files/pkg/lambda_${{ matrix.lambda-name }}_python${{ matrix.python-version }}.zip
 
   # Download all artifacts and commit them to the repository. This seperate job prevents a push to the repository per zip file due to the matrix.
   push:

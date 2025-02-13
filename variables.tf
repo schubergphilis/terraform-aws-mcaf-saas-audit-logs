@@ -54,6 +54,11 @@ variable "object_locking" {
   description = "Object locking configuration for S3 log and access-log buckets"
 }
 
+variable "python_version" {
+  type        = string
+  default     = "3.13"
+  description = "The version of Python to use for the Lambda function"
+}
 variable "scheduled_time" {
   type        = string
   default     = "09:00"
