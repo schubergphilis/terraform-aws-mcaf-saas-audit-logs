@@ -133,7 +133,7 @@ module "lambda" {
   lambda_pkg_path      = "${path.module}/files/pkg/lambda_${each.key}_python${var.python_version}.zip"
   lambda_policy        = try(each.value.lambda_policy, null)
   object_locking       = var.object_locking
-  python_version = var.python_version
+  python_version       = var.python_version
   scheduled_time       = var.scheduled_time
   secret_name          = try(each.value.secret_name, "/audit-log-tokens/${each.key}")
   service_name         = each.value.service_name
