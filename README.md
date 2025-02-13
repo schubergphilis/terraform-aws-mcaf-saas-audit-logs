@@ -117,6 +117,7 @@ Each source can be tuned by setting the following optional fields:
 | <a name="input_created_bucket_names"></a> [created\_bucket\_names](#input\_created\_bucket\_names) | Names of existing S3 buckets to use | <pre>object({<br/>    audit_logs     = string<br/>    lambda_package = string<br/>  })</pre> | `null` | no |
 | <a name="input_lambda_log_retention"></a> [lambda\_log\_retention](#input\_lambda\_log\_retention) | The number of days to retain the logs for the Lambda function | `number` | `365` | no |
 | <a name="input_object_locking"></a> [object\_locking](#input\_object\_locking) | Object locking configuration for S3 log and access-log buckets | <pre>object({<br/>    mode  = optional(string, "GOVERNANCE")<br/>    years = optional(number, 1)<br/>  })</pre> | <pre>{<br/>  "mode": "GOVERNANCE",<br/>  "years": 1<br/>}</pre> | no |
+| <a name="input_python_version"></a> [python\_version](#input\_python\_version) | The version of Python to use for the Lambda function | `string` | `"3.13"` | no |
 | <a name="input_scheduled_time"></a> [scheduled\_time](#input\_scheduled\_time) | Time of day to trigger the audit Lambda functions (runs once a day) | `string` | `"09:00"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to created resources | `map(string)` | `{}` | no |
 
