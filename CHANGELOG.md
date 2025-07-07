@@ -16,15 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Full Changelog**: https://github.com/schubergphilis/terraform-aws-mcaf-saas-audit-logs/compare/v0.2.1...v0.2.2
 
-### What's Changed
-
-#### 🐛 Bug Fixes
-
-* fix: allowing for aws provider version higher than 6 (#5) @macampo
-
-**Full Changelog**: https://github.com/schubergphilis/terraform-aws-mcaf-saas-audit-logs/compare/v0.2.0...v0.2.1
-
-
 ## v0.2.1 - 2025-06-24
 
 ### What's Changed
