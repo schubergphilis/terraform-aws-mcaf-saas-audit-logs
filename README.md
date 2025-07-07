@@ -119,8 +119,8 @@ Each source can be tuned by setting the following optional fields:
 | <a name="input_object_locking"></a> [object\_locking](#input\_object\_locking) | Object locking configuration for S3 log and access-log buckets | <pre>object({<br/>    mode  = optional(string, "GOVERNANCE")<br/>    years = optional(number, 1)<br/>  })</pre> | <pre>{<br/>  "mode": "GOVERNANCE",<br/>  "years": 1<br/>}</pre> | no |
 | <a name="input_python_version"></a> [python\_version](#input\_python\_version) | The version of Python to use for the Lambda function | `string` | `"3.13"` | no |
 | <a name="input_scheduled_time"></a> [scheduled\_time](#input\_scheduled\_time) | Time of day to trigger the audit Lambda functions (runs once a day) | `string` | `"09:00"` | no |
-| <a name="security_grpup_egress_rules"></a> [security\_group\_egress_rules](#input\_security\_group\_egress_rules) | Security Group egress rules        | `list`    | `[]`  | no |
-| <a name="subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids)| Subnet ids where lambda is run     | `list(string)` | `null` | no |
+| <a name="input_security_group_egress_rules"></a> [security\_group\_egress\_rules](#input\_security\_group\_egress\_rules) | Security Group egress rules | <pre>list(object({<br/>    cidr_ipv4                    = optional(string)<br/>    cidr_ipv6                    = optional(string)<br/>    description                  = string<br/>    from_port                    = optional(number, 0)<br/>    ip_protocol                  = optional(string, "-1")<br/>    prefix_list_id               = optional(string)<br/>    referenced_security_group_id = optional(string)<br/>    to_port                      = optional(number, 0)<br/>  }))</pre> | `[]` | no |
+| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | The subnet ids where this lambda needs to run | `list(string)` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to created resources | `map(string)` | `{}` | no |
 
 ## Outputs
