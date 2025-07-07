@@ -100,6 +100,28 @@ variable "sources" {
   }
 }
 
+variable "security_group_egress_rules" {
+  type = list(object({
+    cidr_ipv4                    = optional(string)
+    cidr_ipv6                    = optional(string)
+    description                  = string
+    from_port                    = optional(number, 0)
+    ip_protocol                  = optional(string, "-1")
+    prefix_list_id               = optional(string)
+    referenced_security_group_id = optional(string)
+    to_port                      = optional(number, 0)
+  }))
+  default     = []
+  description = "Security Group egress rules"
+
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  default     = null
+  description = "The subnet ids where this lambda needs to run"
+}
+
 variable "tags" {
   type        = map(string)
   default     = {}

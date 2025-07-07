@@ -137,5 +137,6 @@ module "lambda" {
   scheduled_time       = var.scheduled_time
   secret_name          = try(each.value.secret_name, "/audit-log-tokens/${each.key}")
   service_name         = each.value.service_name
+  subnet_ids           = var.subnet_ids
   tags                 = try(merge(var.tags, each.value.tags), null)
 }
