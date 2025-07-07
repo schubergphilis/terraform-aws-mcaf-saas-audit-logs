@@ -136,6 +136,28 @@ variable "secret_name" {
   description = "The name of the Secrets Manager secret"
 }
 
+variable "security_group_egress_rules" {
+  type = list(object({
+    cidr_ipv4                    = optional(string)
+    cidr_ipv6                    = optional(string)
+    description                  = string
+    from_port                    = optional(number, 0)
+    ip_protocol                  = optional(string, "-1")
+    prefix_list_id               = optional(string)
+    referenced_security_group_id = optional(string)
+    to_port                      = optional(number, 0)
+  }))
+  default = [
+    {
+      description = "Default Security Group rule for SaaS Audit Lambda"
+      ip_protocol = "tcp"
+      cidr_ipv4   = "0.0.0.0/0"
+      to_port     = 443
+    }
+  ]
+  description = "Security Group egress rules"
+}
+
 variable "service_name" {
   type        = string
   description = "The name of the service"
@@ -145,4 +167,10 @@ variable "tags" {
   type        = map(string)
   default     = {}
   description = "A map of tags to assign to created resources"
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  default     = null
+  description = "List of subnet IDs associated with the Lambda function"
 }

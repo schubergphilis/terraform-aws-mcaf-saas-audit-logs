@@ -116,26 +116,28 @@ module "lambda" {
 
   source = "./modules/audit-lambda"
 
-  api_token            = each.value.api_token
-  api_url              = each.value.api_url
-  bucket_base_name     = var.create_bucket_per_source ? try(each.value.bucket_base_name, "${each.key}-audit-logs") : var.bucket_base_name
-  bucket_prefix        = try(each.value.bucket_prefix, each.key)
-  compress_audit_logs  = try(each.value.compress_audit_logs, var.compress_audit_logs)
-  create_bucket        = local.create_bucket != true
-  created_bucket_names = var.created_bucket_names != null ? var.created_bucket_names : local.created_bucket_names
-  dead_letter_queue    = try(each.value.dead_letter_queue, null)
-  environment          = try(each.value.environment, null)
-  kms_key_arn          = var.kms_key_arn
-  lambda_log_level     = each.value.lambda_log_level
-  lambda_log_retention = var.lambda_log_retention
-  lambda_memory_size   = try(each.value.lambda_memory_size, null)
-  lambda_name          = try(each.value.lambda_name, "${each.key}-audit-log-fetcher")
-  lambda_pkg_path      = "${path.module}/files/pkg/lambda_${each.key}_python${var.python_version}.zip"
-  lambda_policy        = try(each.value.lambda_policy, null)
-  object_locking       = var.object_locking
-  python_version       = var.python_version
-  scheduled_time       = var.scheduled_time
-  secret_name          = try(each.value.secret_name, "/audit-log-tokens/${each.key}")
-  service_name         = each.value.service_name
-  tags                 = try(merge(var.tags, each.value.tags), null)
+  api_token                   = each.value.api_token
+  api_url                     = each.value.api_url
+  bucket_base_name            = var.create_bucket_per_source ? try(each.value.bucket_base_name, "${each.key}-audit-logs") : var.bucket_base_name
+  bucket_prefix               = try(each.value.bucket_prefix, each.key)
+  compress_audit_logs         = try(each.value.compress_audit_logs, var.compress_audit_logs)
+  create_bucket               = local.create_bucket != true
+  created_bucket_names        = var.created_bucket_names != null ? var.created_bucket_names : local.created_bucket_names
+  dead_letter_queue           = try(each.value.dead_letter_queue, null)
+  environment                 = try(each.value.environment, null)
+  kms_key_arn                 = var.kms_key_arn
+  lambda_log_level            = each.value.lambda_log_level
+  lambda_log_retention        = var.lambda_log_retention
+  lambda_memory_size          = try(each.value.lambda_memory_size, null)
+  lambda_name                 = try(each.value.lambda_name, "${each.key}-audit-log-fetcher")
+  lambda_pkg_path             = "${path.module}/files/pkg/lambda_${each.key}_python${var.python_version}.zip"
+  lambda_policy               = try(each.value.lambda_policy, null)
+  object_locking              = var.object_locking
+  python_version              = var.python_version
+  scheduled_time              = var.scheduled_time
+  secret_name                 = try(each.value.secret_name, "/audit-log-tokens/${each.key}")
+  service_name                = each.value.service_name
+  subnet_ids                  = var.subnet_ids
+  security_group_egress_rules = var.security_group_egress_rules
+  tags                        = try(merge(var.tags, each.value.tags), null)
 }
