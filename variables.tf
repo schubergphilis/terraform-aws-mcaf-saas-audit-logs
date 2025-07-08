@@ -124,7 +124,7 @@ variable "security_group_egress_rules" {
 variable "subnet_ids" {
   type        = list(string)
   default     = null
-  description = "The subnet ids where this lambda needs to run"
+  description = "List of subnet IDs associated with the Lambda function"
 }
 
 variable "tags" {
