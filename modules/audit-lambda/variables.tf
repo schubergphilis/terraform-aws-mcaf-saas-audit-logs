@@ -147,7 +147,14 @@ variable "security_group_egress_rules" {
     referenced_security_group_id = optional(string)
     to_port                      = optional(number, 0)
   }))
-  default     = []
+  default = [
+    {
+      description = "Default Security Group rule for SaaS Audit Lambda"
+      ip_protocol = "tcp"
+      cidr_ipv4   = "0.0.0.0/0"
+      to_port     = 443
+    }
+  ]
   description = "Security Group egress rules"
 }
 
