@@ -174,5 +174,3 @@ variable "subnet_ids" {
   default     = null
   description = "List of subnet IDs associated with the Lambda function"
 }
-
-
