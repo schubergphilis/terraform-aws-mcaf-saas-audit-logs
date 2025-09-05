@@ -181,7 +181,7 @@ resource "aws_s3_object" "lambda_package" {
   key         = "${var.lambda_name}-lambda.zip"
   kms_key_id  = var.kms_key_arn
   source      = var.lambda_pkg_path
-  source_hash = filebase64sha256(var.lambda_pkg_path)
+  source_hash = filemd5(var.lambda_pkg_path)
   tags        = var.tags
 }
 
@@ -202,7 +202,7 @@ module "lambda" {
   s3_bucket                   = "${var.bucket_base_name}-lambda-${data.aws_caller_identity.current.account_id}"
   s3_key                      = aws_s3_object.lambda_package.key
   s3_object_version           = aws_s3_object.lambda_package.version_id
-  source_code_hash            = filebase64sha256(var.lambda_pkg_path)
+  source_code_hash            = aws_s3_object.lambda_package.checksum_sha256
   timeout                     = 600
   tags                        = var.tags
   security_group_egress_rules = var.security_group_egress_rules
