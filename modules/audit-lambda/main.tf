@@ -177,11 +177,12 @@ resource "aws_secretsmanager_secret_version" "token" {
 }
 
 resource "aws_s3_object" "lambda_package" {
-  bucket     = local.bucket_for_lambda_package.id
-  key        = "${var.lambda_name}-lambda.zip"
-  kms_key_id = var.kms_key_arn
-  source     = var.lambda_pkg_path
-  tags       = var.tags
+  bucket      = local.bucket_for_lambda_package.id
+  key         = "${var.lambda_name}-lambda.zip"
+  kms_key_id  = var.kms_key_arn
+  source      = var.lambda_pkg_path
+  source_hash = filemd5(var.lambda_pkg_path)
+  tags        = var.tags
 }
 
 module "lambda" {
