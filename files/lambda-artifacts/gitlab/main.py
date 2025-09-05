@@ -7,7 +7,7 @@ import os
 import requests
 from botocore.exceptions import BotoCoreError, ClientError
 
-# Set up logger
+# Setting up logger
 logger = logging.getLogger()
 logger.setLevel(logging.getLevelName(os.environ.get('LOG_LEVEL', 'INFO').upper()))
 
