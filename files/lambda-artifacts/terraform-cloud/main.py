@@ -39,6 +39,15 @@ def fetch_pagination_data(url, headers, params):
     """Fetch pagination data from Terraform Cloud."""
     try:
         response = requests.get(url, headers=headers, params=params, timeout=REQUEST_TIMEOUT)
+        if response.status_code == 429:
+            # Use retry-after header to wait before retrying if present, else default to 30 seconds
+            retry_after_header = response.headers.get('Retry-After', '30')
+            try:
+                retry_after = int(retry_after_header)
+            except ValueError:
+                retry_after = 30
+            logger.info(f'Rate limit exceeded. Retry after {retry_after} seconds.')
+            return {'rate_limited': True, 'retry_after': retry_after}
         response.raise_for_status()
         return response.json()
     except requests.Timeout as e:
@@ -81,12 +90,15 @@ def upload_to_s3(file_name, bucket, bucket_prefix, audit_data, compress=True):
         raise
 
 
-def send_sqs_message(queue_url, message_body):
+def send_sqs_message(queue_url, message_body, delay_seconds=0):
     """Send a message to SQS."""
-
     sqs = boto3.client('sqs')
     try:
-        sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(message_body))
+        sqs.send_message(
+            QueueUrl=queue_url, 
+            MessageBody=json.dumps(message_body),
+            DelaySeconds=delay_seconds
+        )
     except ClientError as e:
         logger.error(f'Error sending SQS message: {e}')
         raise
@@ -94,7 +106,6 @@ def send_sqs_message(queue_url, message_body):
 
 def send_sqs_batch_messages(queue_url, messages):
     """Send a batch of messages to SQS."""
-
     sqs = boto3.client('sqs')
     try:
         sqs.send_message_batch(QueueUrl=queue_url, Entries=messages)
@@ -152,6 +163,15 @@ def handler(event, context):
                 # Fetch the total number of pages to be processed
                 params = {'since': log_date}
                 data = fetch_pagination_data(audit_api_url, headers, params)
+                if data and data.get('rate_limited'):
+                    retry_after = data['retry_after']
+                    logger.info(f'Rate limited during extract_init. Re-queuing after {retry_after} seconds.')
+                    send_sqs_message(
+                        queue_url,
+                        {'log_date': log_date, 'page': page, 'total_pages': total_pages, 'operation': 'extract_init'},
+                        delay_seconds=min(retry_after, 900)
+                    )
+                    return f'Rate limited. extract_init message re-queued after {retry_after} seconds.'
                 if data:
                     total_pages = data['pagination']['total_pages']
 
@@ -189,6 +209,15 @@ def handler(event, context):
             logger.info(f'Extracting audit data for page {page}...')
             params = {'since': log_date, 'page[number]': page}
             data = fetch_pagination_data(audit_api_url, headers, params)
+            if data and data.get('rate_limited'):
+                retry_after = data['retry_after']
+                logger.info(f'Rate limited during extract. Re-queuing after {retry_after} seconds.')
+                send_sqs_message(
+                    queue_url,
+                    {'log_date': log_date, 'page': page, 'total_pages': total_pages, 'operation': 'extract'},
+                    delay_seconds=min(retry_after, 900)
+                )
+                return f'Rate limited. extract block message re-queued after {retry_after} seconds.'
             if data:
                 audit_data = data['data']
                 if audit_data:
