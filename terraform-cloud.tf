@@ -90,7 +90,7 @@ module "dlq_replay_lambda" {
 resource "aws_lambda_permission" "allow_dlq_to_invoke_dlq_replay_lambda" {
   statement_id  = "AllowLambdaExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
-  function_name = module.lambda.name
+  function_name = module.dlq_replay_lambda.name
   principal     = "events.amazonaws.com"
   source_arn    = aws_sqs_queue.terraform_cloud_audit_log_dlq[0].arn
 }
