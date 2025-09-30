@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "iam_policy" {
 
   statement {
     sid       = "AllowCloudWatchPutLogEvents"
-    resources = ["arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:*"]
+    resources = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
 
     actions = [
       "logs:CreateLogGroup",
