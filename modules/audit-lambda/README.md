@@ -71,4 +71,7 @@
 | Name | Description |
 |------|-------------|
 | <a name="output_arn"></a> [arn](#output\_arn) | The ARN of the Lambda function |
+| <a name="output_s3_lambda_package_object_checksum_sha256"></a> [s3\_lambda\_package\_object\_checksum\_sha256](#output\_s3\_lambda\_package\_object\_checksum\_sha256) | S3 Lambda package object checksum (sha256) |
+| <a name="output_s3_lambda_package_object_key"></a> [s3\_lambda\_package\_object\_key](#output\_s3\_lambda\_package\_object\_key) | S3 Lambda package object key |
+| <a name="output_s3_lambda_package_object_version"></a> [s3\_lambda\_package\_object\_version](#output\_s3\_lambda\_package\_object\_version) | S3 Lambda package object key |
 <!-- END_TF_DOCS -->

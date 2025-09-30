@@ -92,6 +92,7 @@ Each source can be tuned by setting the following optional fields:
 | <a name="module_bucket_for_access_logs"></a> [bucket\_for\_access\_logs](#module\_bucket\_for\_access\_logs) | schubergphilis/mcaf-s3/aws | ~> 0.14.1 |
 | <a name="module_bucket_for_audit_logs"></a> [bucket\_for\_audit\_logs](#module\_bucket\_for\_audit\_logs) | schubergphilis/mcaf-s3/aws | ~> 0.14.1 |
 | <a name="module_bucket_for_lambda_package"></a> [bucket\_for\_lambda\_package](#module\_bucket\_for\_lambda\_package) | schubergphilis/mcaf-s3/aws | ~> 0.14.1 |
+| <a name="module_dlq_replay_lambda"></a> [dlq\_replay\_lambda](#module\_dlq\_replay\_lambda) | schubergphilis/mcaf-lambda/aws | ~> 1.4.1 |
 | <a name="module_lambda"></a> [lambda](#module\_lambda) | ./modules/audit-lambda | n/a |
 
 ## Resources
@@ -99,6 +100,7 @@ Each source can be tuned by setting the following optional fields:
 | Name | Type |
 |------|------|
 | [aws_lambda_event_source_mapping.terraform_audit_sqs_trigger](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_event_source_mapping) | resource |
+| [aws_lambda_permission.allow_dlq_to_invoke_dlq_replay_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
 | [aws_sqs_queue.terraform_cloud_audit_log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sqs_queue) | resource |
 | [aws_sqs_queue.terraform_cloud_audit_log_dlq](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sqs_queue) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
