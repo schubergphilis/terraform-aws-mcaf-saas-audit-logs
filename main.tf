@@ -46,6 +46,9 @@ locals {
     terraform-cloud = {
       api_url           = "https://app.terraform.io/api/v2/organization/audit-trail"
       dead_letter_queue = try(aws_sqs_queue.terraform_cloud_audit_log_dlq[0].arn, null)
+      lambda_policy = try(data.aws_iam_policy_document.terraform_cloud[0].json, null)
+      service_name  = "Terraform Cloud"
+
       environment = try(
         {
           QUEUE_URL   = aws_sqs_queue.terraform_cloud_audit_log[0].id
@@ -54,8 +57,6 @@ locals {
         },
         null
       )
-      lambda_policy = try(data.aws_iam_policy_document.terraform_cloud[0].json, null)
-      service_name  = "Terraform Cloud"
     }
   }
 
