@@ -6,9 +6,9 @@ data "aws_iam_policy_document" "terraform_cloud" {
   count = local.create_terraform_cloud_resources ? 1 : 0
 
   statement {
-    sid       = "AllowSQSToFrom"
-    effect    = "Allow"
-    
+    sid    = "AllowSQSToFrom"
+    effect = "Allow"
+
     actions = [
       "sqs:DeleteMessage",
       "sqs:GetQueueUrl",
