@@ -45,9 +45,10 @@ resource "aws_sqs_queue" "terraform_cloud_audit_log" {
 resource "aws_sqs_queue" "terraform_cloud_audit_log_dlq" {
   count = local.create_terraform_cloud_resources ? 1 : 0
 
-  name                      = "terraform-audit-log-dlq"
-  kms_master_key_id         = var.kms_key_arn
-  message_retention_seconds = 691200
+  name                       = "terraform-audit-log-dlq"
+  kms_master_key_id          = var.kms_key_arn
+  message_retention_seconds  = 691200
+  visibility_timeout_seconds = 600
 }
 
 resource "aws_lambda_event_source_mapping" "terraform_audit_sqs_trigger" {
