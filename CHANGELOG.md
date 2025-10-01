@@ -5,6 +5,16 @@ All notable changes to this project will automatically be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.3.5 - 2025-10-01
+
+### What's Changed
+
+#### 🐛 Bug Fixes
+
+* fix: Adding exponential backoff for Terraform rate limit errors with max retry (#11) @mayur7436
+
+**Full Changelog**: https://github.com/schubergphilis/terraform-aws-mcaf-saas-audit-logs/compare/v0.3.4...v0.3.5
+
 ## v0.3.4 - 2025-09-15
 
 ### What's Changed
