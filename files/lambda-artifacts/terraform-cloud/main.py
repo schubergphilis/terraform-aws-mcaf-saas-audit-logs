@@ -15,6 +15,8 @@ logger.setLevel(logging.getLevelName(os.environ.get('LOG_LEVEL', 'INFO').upper()
 # Timeout settings for HTTP requests
 REQUEST_TIMEOUT = 5  # seconds
 
+# Max retries for rate limiting
+MAX_RETRIES = int(os.environ.get('MAX_RETRIES', '5'))
 
 def uniqueid():
     """Generate unique IDs starting from a random seed."""
@@ -127,6 +129,8 @@ def handler(event, context):
         compress = os.environ.get('COMPRESS_AUDIT_LOGS', 'True').lower() == 'true'
         days_to_fetch = int(os.environ['DAYS_TO_FETCH'])
         queue_url = os.environ['QUEUE_URL']
+        dlq_url = os.environ['DLQ_URL']
+
     except KeyError as e:
         logger.error(f'Missing environment variable: {e}')
         raise
@@ -151,6 +155,7 @@ def handler(event, context):
         logger.debug('Lambda triggered by SQS event')
         message = event['Records'][0]
         body = json.loads(message['body'])
+        retry_count = body.get('retry_count', 0)
         log_date = body['log_date']
         page = body['page']
         total_pages = body['total_pages']
@@ -165,15 +170,25 @@ def handler(event, context):
                 data = fetch_pagination_data(audit_api_url, headers, params)
                 if data and data.get('rate_limited'):
                     retry_after = data['retry_after']
-                    logger.info(f'Rate limited during extract_init. Re-queuing after {retry_after} seconds.')
+                    next_retry_count = retry_count + 1
+                    delay = min(retry_after * (2 ** next_retry_count), 900)  # Exponential backoff
+                    if next_retry_count > MAX_RETRIES:
+                        logger.error('Max retries exceeded. Sending message to DLQ.')
+                        send_sqs_message(
+                            dlq_url,
+                            {'log_date': log_date, 'page': page, 'total_pages': total_pages, 'operation': 'extract_init', 'retry_count': next_retry_count}
+                        )
+                        return 'Max retries exceeded. Message sent to DLQ.'
+                    logger.info(f'Rate limited during {operation}. Re-queuing after {delay} seconds. Attempt {next_retry_count}/{MAX_RETRIES}')
                     send_sqs_message(
                         queue_url,
-                        {'log_date': log_date, 'page': page, 'total_pages': total_pages, 'operation': 'extract_init'},
+                        {'log_date': log_date, 'page': page, 'total_pages': total_pages, 'operation': 'extract_init', 'retry_count': next_retry_count},
                         delay_seconds=min(retry_after, 900)
                     )
-                    return f'Rate limited. extract_init message re-queued after {retry_after} seconds.'
+                    return f'Rate limited. {operation} message re-queued after {delay} seconds (attempt {next_retry_count}/{MAX_RETRIES}).'
                 if data:
                     total_pages = data['pagination']['total_pages']
+                    logger.info(f'Total pages to process: {total_pages}')
 
             sqs_pages = []
             for index in range(9):
@@ -211,13 +226,22 @@ def handler(event, context):
             data = fetch_pagination_data(audit_api_url, headers, params)
             if data and data.get('rate_limited'):
                 retry_after = data['retry_after']
-                logger.info(f'Rate limited during extract. Re-queuing after {retry_after} seconds.')
+                next_retry_count = retry_count + 1
+                delay = min(retry_after * (2 ** next_retry_count), 900)  # Exponential backoff
+                if next_retry_count > MAX_RETRIES:
+                    logger.error('Max retries exceeded. Sending message to DLQ.')
+                    send_sqs_message(
+                        dlq_url,
+                        {'log_date': log_date, 'page': page, 'total_pages': total_pages, 'operation': {operation}, 'retry_count': next_retry_count}
+                    )
+                    return 'Max retries exceeded. Message sent to DLQ.'
+                logger.info(f'Rate limited during {operation}. Re-queuing after {delay} seconds. Attempt {next_retry_count}/{MAX_RETRIES}')
                 send_sqs_message(
                     queue_url,
-                    {'log_date': log_date, 'page': page, 'total_pages': total_pages, 'operation': 'extract'},
+                    {'log_date': log_date, 'page': page, 'total_pages': total_pages, 'operation': {operation}, 'retry_count': next_retry_count},
                     delay_seconds=min(retry_after, 900)
                 )
-                return f'Rate limited. extract block message re-queued after {retry_after} seconds.'
+                return f'Rate limited. {operation} message re-queued after {delay} seconds (attempt {next_retry_count}/{MAX_RETRIES}).'
             if data:
                 audit_data = data['data']
                 if audit_data:
