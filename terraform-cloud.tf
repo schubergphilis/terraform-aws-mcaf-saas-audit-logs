@@ -67,6 +67,7 @@ module "dlq_replay_lambda" {
   kms_key_arn                 = var.kms_key_arn
   log_retention               = var.lambda_log_retention
   memory_size                 = 128
+  policy                      = module.lambda["terraform-cloud"].iam_policy
   runtime                     = "python${var.python_version}"
   s3_bucket                   = "${var.bucket_base_name}-lambda-${data.aws_caller_identity.current.account_id}"
   s3_key                      = module.lambda["terraform-cloud"].s3_lambda_package_object_key
