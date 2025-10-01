@@ -8,8 +8,7 @@ data "aws_iam_policy_document" "terraform_cloud" {
   statement {
     sid       = "AllowSQSToFrom"
     effect    = "Allow"
-    resources = [aws_sqs_queue.terraform_cloud_audit_log[0].arn]
-
+    
     actions = [
       "sqs:DeleteMessage",
       "sqs:GetQueueUrl",
@@ -18,6 +17,10 @@ data "aws_iam_policy_document" "terraform_cloud" {
       "sqs:GetQueueAttributes",
       "sqs:SendMessageBatch",
       "sqs:SetQueueAttributes"
+    ]
+    resources = [
+      aws_sqs_queue.terraform_cloud_audit_log[0].arn,
+      aws_sqs_queue.terraform_cloud_audit_log_dlq[0].arn
     ]
   }
 }
@@ -89,10 +92,9 @@ module "dlq_replay_lambda" {
   ]
 }
 
-resource "aws_lambda_permission" "allow_dlq_to_invoke_dlq_replay_lambda" {
-  statement_id  = "AllowLambdaExecutionFromCloudWatch"
-  action        = "lambda:InvokeFunction"
-  function_name = module.dlq_replay_lambda.name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_sqs_queue.terraform_cloud_audit_log_dlq[0].arn
+resource "aws_lambda_event_source_mapping" "dlq_trigger" {
+  batch_size       = 1
+  enabled          = true
+  event_source_arn = aws_sqs_queue.terraform_cloud_audit_log_dlq[0].arn
+  function_name    = module.dlq_replay_lambda.name
 }
